@@ -10,7 +10,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt_dlp-latest.tar.gz
+    pip install --no-cache-dir "yt-dlp @ https://github.com/yt-dlp/yt-dlp/archive/refs/heads/master.tar.gz"
 
 COPY . .
 
