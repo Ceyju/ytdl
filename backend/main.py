@@ -32,6 +32,33 @@ def get_base_opts():
         "remote_components": ["ejs:github"],
     }
 
+@app.get("/formats")
+def list_formats(url: str):
+    """Debug endpoint — returns all available formats for a URL."""
+    opts = {"quiet": True, **get_base_opts()}
+    if COOKIES_FILE:
+        opts["cookiefile"] = COOKIES_FILE
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            formats = [
+                {
+                    "format_id": f.get("format_id"),
+                    "ext": f.get("ext"),
+                    "height": f.get("height"),
+                    "width": f.get("width"),
+                    "vcodec": f.get("vcodec"),
+                    "acodec": f.get("acodec"),
+                    "filesize": f.get("filesize"),
+                    "tbr": f.get("tbr"),
+                }
+                for f in info.get("formats", [])
+            ]
+            return {"formats": formats}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @app.get("/info")
 def get_info(url: str):
     opts = {"quiet": True, **get_base_opts()}
