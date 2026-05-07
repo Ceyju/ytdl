@@ -29,7 +29,7 @@ if yt_cookies:
 def get_base_opts():
     return {
         "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
-        "remote_components": "ejs:github",
+        "remote_components": ["ejs:github"],
     }
 
 @app.get("/info")
