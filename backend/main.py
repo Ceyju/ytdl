@@ -7,7 +7,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # replace with your Cloudflare URL later
+    allow_origins=["https://ramify.kurtangelobenavides-mejorada.workers.dev/"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
