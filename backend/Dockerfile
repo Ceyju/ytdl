@@ -1,10 +1,11 @@
 FROM python:3.11-slim
 
-# Install FFmpeg and Node.js 20 (Node required for yt-dlp n-challenge solver)
-RUN apt-get update && apt-get install -y curl ffmpeg && \
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
+# Install FFmpeg, curl, unzip
+RUN apt-get update && apt-get install -y curl ffmpeg unzip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Deno (yt-dlp EJS runtime for n-challenge solving)
+RUN curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh
 
 WORKDIR /app
 

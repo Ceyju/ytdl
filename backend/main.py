@@ -23,11 +23,9 @@ if yt_cookies:
     _cookies_tmp.close()
     COOKIES_FILE = _cookies_tmp.name
 
-# When cookies are present: use default web client (supports cookies, Node.js handles n-challenge)
-# When no cookies: use android client (bypasses n-challenge without Node.js)
+# android client bypasses n-challenge natively (no JS runtime needed)
+# Deno (installed in container) handles n-challenge for web fallback
 def get_base_opts():
-    if COOKIES_FILE:
-        return {}  # web client used by default; Node.js in container solves n-challenge
     return {"extractor_args": {"youtube": {"player_client": ["android", "web"]}}}
 
 @app.get("/info")
