@@ -44,7 +44,7 @@ async function fetchInfo() {
 
 async function downloadFile() {
   if (!currentUrl) return;
-  setStatus("⏳ Downloading... this may take a moment.");
+  setStatus("Downloading... this may take a moment lol.");
 
   try {
     const res = await fetch(

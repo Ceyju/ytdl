@@ -75,8 +75,10 @@ def download(url: str, format: str = "mp3", quality: str = "720"):
         out_path = f"{filepath}.mp3"
         media_type = "audio/mpeg"
     else:
-        # Prefer exact height, fall back to next best mp4, then any best
-        fmt = f"bestvideo[height<={quality}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<={quality}]+bestaudio/best[ext=mp4]/best"
+        # Sort by resolution descending, pick closest to requested height, merge to mp4
+        fmt = (
+            f"bestvideo[height<={quality}]+bestaudio/best[height<={quality}]"
+        )
         ydl_opts = {
             **get_base_opts(),
             "format": fmt,
