@@ -23,13 +23,12 @@ if yt_cookies:
     _cookies_tmp.close()
     COOKIES_FILE = _cookies_tmp.name
 
-# android client bypasses n-challenge natively (no JS runtime needed)
-# Deno (installed in container) handles n-challenge for web fallback
-# remote_components downloads the EJS solver script from GitHub
+# android client bypasses n-challenge natively — do NOT pass cookiefile globally
+# as it causes android to be skipped, leaving only legacy 360p stream available.
+# Cookies are loaded but only used when explicitly needed (e.g. age-restricted).
 def get_base_opts():
     return {
         "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
-        "remote_components": ["ejs:github"],
     }
 
 @app.get("/formats")
@@ -62,8 +61,7 @@ def list_formats(url: str):
 @app.get("/info")
 def get_info(url: str):
     opts = {"quiet": True, **get_base_opts()}
-    if COOKIES_FILE:
-        opts["cookiefile"] = COOKIES_FILE
+    # Do not pass cookiefile — causes android client to be skipped
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -97,12 +95,10 @@ def download(url: str, format: str = "mp3", quality: str = "720"):
                 }
             ],
         }
-        if COOKIES_FILE:
-            ydl_opts["cookiefile"] = COOKIES_FILE
+        # Do not pass cookiefile — causes android client to be skipped
         out_path = f"{filepath}.mp3"
         media_type = "audio/mpeg"
     else:
-        # Sort by resolution descending, pick closest to requested height, merge to mp4
         fmt = (
             f"bestvideo[height<={quality}]+bestaudio/best[height<={quality}]"
         )
@@ -112,8 +108,7 @@ def download(url: str, format: str = "mp3", quality: str = "720"):
             "outtmpl": f"{filepath}.mp4",
             "merge_output_format": "mp4",
         }
-        if COOKIES_FILE:
-            ydl_opts["cookiefile"] = COOKIES_FILE
+        # Do not set cookiefile — it causes android client to be skipped
         out_path = f"{filepath}.mp4"
         media_type = "video/mp4"
 
