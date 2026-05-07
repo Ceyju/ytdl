@@ -25,8 +25,12 @@ if yt_cookies:
 
 # android client bypasses n-challenge natively (no JS runtime needed)
 # Deno (installed in container) handles n-challenge for web fallback
+# remote_components downloads the EJS solver script from GitHub
 def get_base_opts():
-    return {"extractor_args": {"youtube": {"player_client": ["android", "web"]}}}
+    return {
+        "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
+        "remote_components": "ejs:github",
+    }
 
 @app.get("/info")
 def get_info(url: str):
