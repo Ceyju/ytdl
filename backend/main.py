@@ -7,7 +7,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ramify.kurtangelobenavides-mejorada.workers.dev/"],
+    allow_origins=["https://ytdl-bxd.pages.dev/"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
