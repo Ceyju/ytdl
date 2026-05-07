@@ -1,5 +1,6 @@
 const API = "https://ramify.onrender.com";
 let selectedFormat = "mp3";
+let selectedQuality = "720";
 let currentUrl = "";
 
 function setFormat(format) {
@@ -8,6 +9,15 @@ function setFormat(format) {
     `flex-1 py-2 rounded-lg font-semibold ${format === "mp3" ? "bg-red-600" : "bg-gray-700"}`;
   document.getElementById("mp4Btn").className =
     `flex-1 py-2 rounded-lg font-semibold ${format === "mp4" ? "bg-red-600" : "bg-gray-700"}`;
+  document.getElementById("qualityRow").classList.toggle("hidden", format !== "mp4");
+}
+
+function setQuality(quality) {
+  selectedQuality = quality;
+  ["480", "720", "1080"].forEach(q => {
+    document.getElementById(`q${q}Btn`).className =
+      `flex-1 py-1.5 rounded-lg text-sm font-semibold ${q === quality ? "bg-red-600" : "bg-gray-700"}`;
+  });
 }
 
 async function fetchInfo() {
@@ -38,7 +48,7 @@ async function downloadFile() {
 
   try {
     const res = await fetch(
-      `${API}/download?url=${encodeURIComponent(currentUrl)}&format=${selectedFormat}`
+      `${API}/download?url=${encodeURIComponent(currentUrl)}&format=${selectedFormat}&quality=${selectedQuality}`
     );
     if (!res.ok) throw new Error("Non-OK response");
     const blob = await res.blob();

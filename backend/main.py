@@ -23,9 +23,14 @@ if yt_cookies:
     _cookies_tmp.close()
     COOKIES_FILE = _cookies_tmp.name
 
+# Use Android client to bypass n-challenge (no Node.js required)
+BASE_OPTS = {
+    "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
+}
+
 @app.get("/info")
 def get_info(url: str):
-    opts = {"quiet": True}
+    opts = {"quiet": True, **BASE_OPTS}
     if COOKIES_FILE:
         opts["cookiefile"] = COOKIES_FILE
     try:
@@ -41,12 +46,17 @@ def get_info(url: str):
 
 
 @app.get("/download")
-def download(url: str, format: str = "mp3"):
+def download(url: str, format: str = "mp3", quality: str = "720"):
+    if format not in ("mp3", "mp4"):
+        raise HTTPException(status_code=400, detail="format must be mp3 or mp4")
+    if quality not in ("480", "720", "1080"):
+        raise HTTPException(status_code=400, detail="quality must be 480, 720, or 1080")
     filename = str(uuid.uuid4())
     filepath = f"{DOWNLOAD_DIR}/{filename}"
 
     if format == "mp3":
         ydl_opts = {
+            **BASE_OPTS,
             "format": "bestaudio/best",
             "outtmpl": filepath,
             "postprocessors": [
@@ -61,9 +71,13 @@ def download(url: str, format: str = "mp3"):
         out_path = f"{filepath}.mp3"
         media_type = "audio/mpeg"
     else:
+        # Prefer exact height, fall back to next best mp4, then any best
+        fmt = f"bestvideo[height<={quality}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<={quality}]+bestaudio/best[ext=mp4]/best"
         ydl_opts = {
-            "format": "best[ext=mp4]",
+            **BASE_OPTS,
+            "format": fmt,
             "outtmpl": f"{filepath}.mp4",
+            "merge_output_format": "mp4",
         }
         if COOKIES_FILE:
             ydl_opts["cookiefile"] = COOKIES_FILE
