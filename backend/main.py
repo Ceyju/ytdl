@@ -23,11 +23,12 @@ if yt_cookies:
     _cookies_tmp.close()
     COOKIES_FILE = _cookies_tmp.name
 
-# Use Android client to bypass n-challenge (no Node.js required)
-# When cookies are present, use tv_embedded instead (android doesn't support cookies)
+# When cookies are present: use default web client (supports cookies, Node.js handles n-challenge)
+# When no cookies: use android client (bypasses n-challenge without Node.js)
 def get_base_opts():
-    client = ["ios", "web"] if COOKIES_FILE else ["android", "web"]
-    return {"extractor_args": {"youtube": {"player_client": client}}}
+    if COOKIES_FILE:
+        return {}  # web client used by default; Node.js in container solves n-challenge
+    return {"extractor_args": {"youtube": {"player_client": ["android", "web"]}}}
 
 @app.get("/info")
 def get_info(url: str):
