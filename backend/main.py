@@ -1,14 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-import yt_dlp, os, uuid
-import tempfile
+import yt_dlp, os, uuid, tempfile
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ytdl-bxd.pages.dev/"],
+    allow_origins=["https://ytdl-bxd.pages.dev"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -26,15 +25,19 @@ if yt_cookies:
 
 @app.get("/info")
 def get_info(url: str):
-    with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
-        if COOKIES_FILE:
-            ydl.params["cookiefile"] = COOKIES_FILE
-        info = ydl.extract_info(url, download=False)
-        return {
-            "title": info["title"],
-            "thumbnail": info["thumbnail"],
-            "duration": info["duration"],
-        }
+    opts = {"quiet": True}
+    if COOKIES_FILE:
+        opts["cookiefile"] = COOKIES_FILE
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            return {
+                "title": info["title"],
+                "thumbnail": info["thumbnail"],
+                "duration": info["duration"],
+            }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.get("/download")
@@ -67,8 +70,11 @@ def download(url: str, format: str = "mp3"):
         out_path = f"{filepath}.mp4"
         media_type = "video/mp4"
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     ext = "mp3" if format == "mp3" else "mp4"
     return FileResponse(
