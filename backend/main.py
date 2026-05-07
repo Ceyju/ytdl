@@ -24,13 +24,14 @@ if yt_cookies:
     COOKIES_FILE = _cookies_tmp.name
 
 # Use Android client to bypass n-challenge (no Node.js required)
-BASE_OPTS = {
-    "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
-}
+# When cookies are present, use tv_embedded instead (android doesn't support cookies)
+def get_base_opts():
+    client = ["tv_embedded", "web"] if COOKIES_FILE else ["android", "web"]
+    return {"extractor_args": {"youtube": {"player_client": client}}}
 
 @app.get("/info")
 def get_info(url: str):
-    opts = {"quiet": True, **BASE_OPTS}
+    opts = {"quiet": True, **get_base_opts()}
     if COOKIES_FILE:
         opts["cookiefile"] = COOKIES_FILE
     try:
@@ -56,7 +57,7 @@ def download(url: str, format: str = "mp3", quality: str = "720"):
 
     if format == "mp3":
         ydl_opts = {
-            **BASE_OPTS,
+            **get_base_opts(),
             "format": "bestaudio/best",
             "outtmpl": filepath,
             "postprocessors": [
@@ -74,7 +75,7 @@ def download(url: str, format: str = "mp3", quality: str = "720"):
         # Prefer exact height, fall back to next best mp4, then any best
         fmt = f"bestvideo[height<={quality}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<={quality}]+bestaudio/best[ext=mp4]/best"
         ydl_opts = {
-            **BASE_OPTS,
+            **get_base_opts(),
             "format": fmt,
             "outtmpl": f"{filepath}.mp4",
             "merge_output_format": "mp4",
