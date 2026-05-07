@@ -26,7 +26,7 @@ if yt_cookies:
 # Use Android client to bypass n-challenge (no Node.js required)
 # When cookies are present, use tv_embedded instead (android doesn't support cookies)
 def get_base_opts():
-    client = ["tv_embedded", "web"] if COOKIES_FILE else ["android", "web"]
+    client = ["ios", "web"] if COOKIES_FILE else ["android", "web"]
     return {"extractor_args": {"youtube": {"player_client": client}}}
 
 @app.get("/info")
